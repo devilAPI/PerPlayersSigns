@@ -1,0 +1,53 @@
+package de.blablubbabc.insigns;
+
+import org.bukkit.plugin.*;
+import org.bukkit.entity.*;
+import org.bukkit.event.*;
+import org.bukkit.event.block.*;
+import org.bukkit.*;
+
+public class SimpleChanger implements Listener
+{
+    private final String key;
+    private final String permissionsNode;
+    
+    public SimpleChanger(final Plugin plugin, final String key, final String permissionsNode) {
+        if (plugin == null || !plugin.isEnabled()) {
+            throw new IllegalArgumentException("The plugin must not be null and has to be enabled!");
+        }
+        if (key == null || permissionsNode == null) {
+            throw new IllegalArgumentException("The key and the permissions node must not be null!");
+        }
+        this.key = key;
+        this.permissionsNode = permissionsNode;
+        Bukkit.getPluginManager().registerEvents((Listener)this, plugin);
+    }
+    
+    public String getValue(final Player player, final Location location, final String originalLine) {
+        return this.key;
+    }
+    
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onSignSend(final SignSendEvent event) {
+        for (int i = 0; i < 4; ++i) {
+            final String line = event.getLine(i);
+            if (line.contains(this.key)) {
+                event.setLine(i, line.replace(this.key, this.getValue(event.getPlayer(), event.getLocation(), line)));
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onSignCreate(final SignChangeEvent event) {
+        final Player player = event.getPlayer();
+        final String[] arr$;
+        final String[] lines = arr$ = event.getLines();
+        for (final String line : arr$) {
+            if (line.contains(this.key) && !player.hasPermission(this.permissionsNode)) {
+                event.setCancelled(true);
+                player.sendMessage(ChatColor.RED + "Missing permission '" + this.permissionsNode + "' to use '" + this.key + "' on your sign.");
+                return;
+            }
+        }
+    }
+}

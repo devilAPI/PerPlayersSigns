@@ -1,0 +1,88 @@
+package de.blablubbabc.insigns;
+
+import org.bukkit.plugin.java.*;
+import org.bukkit.plugin.*;
+import com.comphenix.protocol.*;
+import com.comphenix.protocol.events.*;
+import java.io.*;
+import org.bukkit.event.player.*;
+import org.bukkit.event.block.*;
+import org.bukkit.*;
+import org.bukkit.block.*;
+import java.util.*;
+import org.bukkit.entity.*;
+import org.bukkit.event.*;
+
+public class InSigns extends JavaPlugin implements Listener
+{
+    @Deprecated
+    private final Map<Changer, SimpleChanger> changers;
+    private ProtocolManager protocolManager;
+    
+    public InSigns() {
+        this.changers = new HashMap<Changer, SimpleChanger>();
+    }
+    
+    public void onEnable() {
+        this.protocolManager = ProtocolLibrary.getProtocolManager();
+        Bukkit.getPluginManager().registerEvents((Listener)this, (Plugin)this);
+        new InSigns.InSigns$1(this, (Plugin)this, "[PLAYER]", "insigns.create.player");
+        new InSigns.InSigns$2(this, (Plugin)this, "[DISPLAY]", "insigns.create.display");
+        this.protocolManager.addPacketListener((PacketListener)new InSigns.InSigns$3(this, (Plugin)this, ListenerPriority.NORMAL, new PacketType[] { PacketType.Play.Server.UPDATE_SIGN }));
+        if (this.getConfig().getBoolean("metrics-stats", true)) {
+            try {
+                final MetricsLite metrics = new MetricsLite((Plugin)this);
+                metrics.start();
+            }
+            catch (IOException ex) {}
+        }
+    }
+    
+    public void onDisable() {
+        this.protocolManager = null;
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    void onInteract(final PlayerInteractEvent event) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
+            final Block block = event.getClickedBlock();
+            final Material blockType = block.getType();
+            if (blockType == Material.WALL_SIGN || blockType == Material.SIGN_POST) {
+                final Sign sign = (Sign)block.getState();
+                sendSignChange(event.getPlayer(), sign);
+            }
+        }
+    }
+    
+    @Deprecated
+    public synchronized List<Changer> getChangerList() {
+        return new ArrayList<Changer>(this.changers.keySet());
+    }
+    
+    public static void sendSignChange(final Player player, final Sign sign) {
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+        if (sign == null) {
+            return;
+        }
+        player.sendSignChange(sign.getLocation(), sign.getLines());
+    }
+    
+    @Deprecated
+    public synchronized void removeChanger(final Changer changer) {
+        final SimpleChanger changerAdapter = this.changers.remove(changer);
+        HandlerList.unregisterAll((Listener)changerAdapter);
+    }
+    
+    @Deprecated
+    public synchronized void addChanger(final Changer changer) {
+        if (changer == null) {
+            throw new IllegalArgumentException("Changer cannot be null!");
+        }
+        final SimpleChanger oldChangerAdapter = this.changers.put(changer, (SimpleChanger)new InSigns.InSigns$4(this, (Plugin)this, changer.getKey(), changer.getPerm(), changer));
+        if (oldChangerAdapter != null) {
+            HandlerList.unregisterAll((Listener)oldChangerAdapter);
+        }
+    }
+}

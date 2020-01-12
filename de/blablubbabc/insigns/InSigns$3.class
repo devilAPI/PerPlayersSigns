@@ -1,0 +1,29 @@
+package de.blablubbabc.insigns;
+
+import org.bukkit.plugin.*;
+import com.comphenix.protocol.*;
+import org.bukkit.*;
+import org.bukkit.event.*;
+import com.comphenix.protocol.events.*;
+import org.bukkit.entity.*;
+import com.comphenix.protocol.wrappers.*;
+
+class InSigns$3 extends PacketAdapter {
+    public void onPacketSending(final PacketEvent event) {
+        final PacketContainer signUpdatePacket = event.getPacket();
+        final Player player = event.getPlayer();
+        final BlockPosition blockPosition = UpdateSignPacketUtility.getLocation(signUpdatePacket);
+        final Location location = new Location(player.getWorld(), (double)blockPosition.getX(), (double)blockPosition.getY(), (double)blockPosition.getZ());
+        final SignSendEvent signSendEvent = new SignSendEvent(player, location, UpdateSignPacketUtility.getLinesAsStrings(signUpdatePacket));
+        Bukkit.getPluginManager().callEvent((Event)signSendEvent);
+        if (signSendEvent.isCancelled()) {
+            event.setCancelled(true);
+        }
+        else if (signSendEvent.isModified()) {
+            final String[] lines = signSendEvent.getLines();
+            final PacketContainer outgoingPacket = signUpdatePacket.shallowClone();
+            UpdateSignPacketUtility.setLinesFromStrings(outgoingPacket, lines);
+            event.setPacket(outgoingPacket);
+        }
+    }
+}

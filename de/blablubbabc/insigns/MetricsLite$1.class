@@ -1,0 +1,6 @@
+package de.blablubbabc.insigns;
+
+class MetricsLite$1 implements Runnable {
+    private boolean firstPost = true;
+
+}

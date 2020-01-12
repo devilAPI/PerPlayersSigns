@@ -1,0 +1,30 @@
+package de.blablubbabc.insigns;
+
+import org.bukkit.entity.*;
+import org.bukkit.*;
+
+@Deprecated
+public abstract class Changer
+{
+    private final String key;
+    private final String perm;
+    
+    @Deprecated
+    public Changer(final String key, final String permission) {
+        if (key == null || permission == null) {
+            throw new IllegalArgumentException("The key and the permissions node must not be null!");
+        }
+        this.key = key;
+        this.perm = permission;
+    }
+    
+    public String getKey() {
+        return this.key;
+    }
+    
+    public String getPerm() {
+        return this.perm;
+    }
+    
+    public abstract String getValue(final Player p0, final Location p1);
+}

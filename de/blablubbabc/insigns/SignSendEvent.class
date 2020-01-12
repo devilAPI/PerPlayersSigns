@@ -1,0 +1,75 @@
+package de.blablubbabc.insigns;
+
+import org.bukkit.entity.*;
+import org.bukkit.event.*;
+import org.bukkit.*;
+
+public class SignSendEvent extends Event implements Cancellable
+{
+    private final Player player;
+    private final Location location;
+    private String[] lines;
+    private boolean modified;
+    private boolean cancelled;
+    private static final HandlerList handlers;
+    
+    SignSendEvent(final Player player, final Location location, final String[] lines) {
+        super(!Bukkit.isPrimaryThread());
+        this.modified = false;
+        this.cancelled = false;
+        this.player = player;
+        this.location = location;
+        this.lines = lines;
+    }
+    
+    public Player getPlayer() {
+        return this.player;
+    }
+    
+    public Location getLocation() {
+        return this.location;
+    }
+    
+    public String getLine(final int index) throws IndexOutOfBoundsException {
+        return this.lines[index];
+    }
+    
+    String[] getLines() {
+        return this.lines;
+    }
+    
+    public boolean isModified() {
+        return this.modified;
+    }
+    
+    public void setLine(final int index, String line) throws IndexOutOfBoundsException {
+        if (line == null) {
+            line = "";
+        }
+        if (line.equals(this.lines[index])) {
+            return;
+        }
+        this.modified = true;
+        this.lines[index] = line;
+    }
+    
+    public boolean isCancelled() {
+        return this.cancelled;
+    }
+    
+    public void setCancelled(final boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+    
+    public HandlerList getHandlers() {
+        return SignSendEvent.handlers;
+    }
+    
+    public static HandlerList getHandlerList() {
+        return SignSendEvent.handlers;
+    }
+    
+    static {
+        handlers = new HandlerList();
+    }
+}

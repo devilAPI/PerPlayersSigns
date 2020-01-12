@@ -1,0 +1,13 @@
+name: players_custom_signs
+main: de.blablubbabc.insigns.InSigns
+version: '2.1'
+author: NeezyHacks
+description: Displays the text on signs for each player individual differently.
+depend: [ProtocolLib]
+permissions:
+  insigns.create.player:
+    description: Erstellen von Schildern
+    default: true
+  insigns.create.display:
+    description: Ability to create signs displaying individual player display/nick names.
+    default: true

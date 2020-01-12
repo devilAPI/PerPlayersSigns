@@ -1,0 +1,11 @@
+package de.blablubbabc.insigns;
+
+import org.bukkit.plugin.*;
+import org.bukkit.entity.*;
+import org.bukkit.*;
+
+class InSigns$1 extends SimpleChanger {
+    public String getValue(final Player player, final Location location, final String originalLine) {
+        return player.getName();
+    }
+}

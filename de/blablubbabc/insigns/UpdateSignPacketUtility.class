@@ -1,0 +1,47 @@
+package de.blablubbabc.insigns;
+
+import com.comphenix.protocol.events.*;
+import com.comphenix.protocol.wrappers.*;
+
+public class UpdateSignPacketUtility
+{
+    private UpdateSignPacketUtility() {
+    }
+    
+    public static BlockPosition getLocation(final PacketContainer updateSignPacket) {
+        return (BlockPosition)updateSignPacket.getBlockPositionModifier().read(0);
+    }
+    
+    public static void setLocation(final PacketContainer updateSignPacket, final BlockPosition blockPosition) {
+        updateSignPacket.getBlockPositionModifier().write(0, (Object)blockPosition);
+    }
+    
+    public static WrappedChatComponent[] getLines(final PacketContainer updateSignPacket) {
+        return (WrappedChatComponent[])updateSignPacket.getChatComponentArrays().read(0);
+    }
+    
+    public static void setLines(final PacketContainer updateSignPacket, final WrappedChatComponent[] lines) {
+        assert lines != null;
+        assert lines.length == 4;
+        updateSignPacket.getChatComponentArrays().write(0, (Object)lines);
+    }
+    
+    public static String[] getLinesAsStrings(final PacketContainer updateSignPacket) {
+        final String[] lines = new String[4];
+        final WrappedChatComponent[] rawLines = getLines(updateSignPacket);
+        for (int i = 0; i < 4; ++i) {
+            lines[i] = rawLines[i].getJson();
+        }
+        return lines;
+    }
+    
+    public static void setLinesFromStrings(final PacketContainer updateSignPacket, final String[] lines) {
+        assert lines != null;
+        assert lines.length == 4;
+        final WrappedChatComponent[] rawLines = new WrappedChatComponent[4];
+        for (int i = 0; i < 4; ++i) {
+            rawLines[i] = WrappedChatComponent.fromJson(lines[i]);
+        }
+        setLines(updateSignPacket, rawLines);
+    }
+}
